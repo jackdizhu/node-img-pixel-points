@@ -1,0 +1,17 @@
+{
+  "name": "img-pix",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "saveImg": "node ./canvasToImg.js",
+    "findImg": "node ./findImg.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "canvas": "^2.3.1",
+    "get-pixels": "^3.3.2",
+    "images": "^3.0.2"
+  }
+}
