@@ -35,3 +35,5 @@
       }
     }
   ```
+
+预览地址 https://jackdizhu.github.io/node-img-pixel-points/
