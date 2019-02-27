@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>canvas 居中画图片</title>
+</head>
+<body>
+  <p>要使用的图片:</p>
+  <img id="img" src="./imgs/testBuffer.png">
+  <p>画布:</p>
+  <canvas id="canvas" width="30" height="40" style="border:1px solid #d3d3d3;">
+    您的浏览器不支持 HTML5 canvas 标签。
+  </canvas>
+  <script>
+    // 获取图片原始尺寸
+    function getImgNatural(src, img, callback) {
+      var nWidth, nHeight;
+      if (img.naturalWidth) { // 现代浏览器
+        nWidth = img.naturalWidth;
+        nHeight = img.naturalHeight;
+        callback(nWidth, nHeight, img);
+      } else { // IE6/7/8
+        var img = new Image();
+        img.src = src;
+        img.onload = function () {
+          callback(img.width, img.height, img);
+        }
+      }
+    }
+
+    getImgNatural("./imgs/testBuffer.png", document.getElementById('img'), function (nWidth, nHeight, img) {
+      var canvas = document.getElementById("canvas");
+      var ctx = canvas.getContext("2d");
+
+      let Cw = canvas.width;
+      let Ch = canvas.height;
+
+      let Iw = nWidth;
+      let Ih = nHeight;
+
+      // 图片宽高小于 canvas
+      if (Iw < Cw && Ih < Ch) {
+        ctx.drawImage(img, (Cw - Iw) / 2, (Ch - Ih) / 2, Iw, Ih);
+      } else if (Iw > Cw && Ih < Ch) {
+        let _Ih = Cw / Iw * Ih;
+        ctx.drawImage(img, 0, (Ch - _Ih) / 2, Cw, _Ih);
+      } else if (Ih > Ch && Iw < Cw) {
+        let _Iw = Ch / Ih * Iw;
+        ctx.drawImage(img, (Cw - _Iw) / 2, 0, _Iw, Ch);
+      } else {
+        // 图片宽高都大于 canvas
+        let _Ih = Cw / Iw * Ih;
+        let _Iw = Ch / Ih * Iw;
+
+        if (_Ih <= Ch) {
+          ctx.drawImage(img, 0, (Ch - _Ih) / 2, Cw, _Ih);
+        } else {
+          ctx.drawImage(img, (Cw - _Iw) / 2, 0, _Iw, Ch);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
