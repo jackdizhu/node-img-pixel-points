@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>canvas 居中画图片</title>
+  <title>canvas 跟随鼠标画线</title>
 </head>
 
 <body>
@@ -35,6 +35,8 @@
     // let { offsetLeft, offsetTop } = canvas;
     let offsetLeft = get_offsetLeft(canvas);
     let offsetTop = get_offsetTop(canvas);
+
+    let [oX, oY] = [0, 0];
     canvas.addEventListener('mousemove', function (MouseEvent) {
       let { clientX, clientY } = MouseEvent;
       let X = clientX - offsetLeft;
@@ -44,9 +46,17 @@
       ctx.lineWidth = "1";
       ctx.strokeStyle = "rgba(0,0,0,1)";
       // 起始点不包含
-      ctx.moveTo(X, Y);
+      if (oX && oY) {
+        ctx.moveTo(oX + 1, oY + 1);
+      } else {
+        ctx.moveTo(X, Y);
+      }
       ctx.lineTo(X + 1, Y + 1);
       ctx.stroke();
+      [oX, oY] = [X, Y];
+    });
+    canvas.addEventListener('mouseout', function (MouseEvent) {
+      [oX, oY] = [0, 0];
     });
   </script>
 </body>
