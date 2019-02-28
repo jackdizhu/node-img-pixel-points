@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>canvas 居中画图片</title>
+</head>
+
+<body>
+  <H2>canvas 测试</H2>
+  <canvas id="canvas" width="300" height="400" style="border:1px solid #d3d3d3;position: relative;">
+    您的浏览器不支持 HTML5 canvas 标签。
+  </canvas>
+  <script>
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    function get_offsetLeft(obj) {
+      var parObj = obj;
+      var left = obj.offsetLeft;
+      while (parObj = parObj.offsetParent) {
+        left += parObj.offsetLeft;
+      }
+      return left;
+    }
+
+    function get_offsetTop(obj) {
+      var parObj = obj;
+      var top = obj.offsetTop;
+      while (parObj = parObj.offsetParent) {
+        top += parObj.offsetTop;
+      }
+      return top;
+    }
+    // let { offsetLeft, offsetTop } = canvas;
+    let offsetLeft = get_offsetLeft(canvas);
+    let offsetTop = get_offsetTop(canvas);
+    canvas.addEventListener('mousemove', function (MouseEvent) {
+      let { clientX, clientY } = MouseEvent;
+      let X = clientX - offsetLeft;
+      let Y = clientY - offsetTop;
+      console.log({ X, Y }); // 鼠标在 canvas 种坐标
+      ctx.beginPath();
+      ctx.lineWidth = "1";
+      ctx.strokeStyle = "rgba(0,0,0,1)";
+      // 起始点不包含
+      ctx.moveTo(X, Y);
+      ctx.lineTo(X + 1, Y + 1);
+      ctx.stroke();
+    });
+  </script>
+</body>
+
+</html>
