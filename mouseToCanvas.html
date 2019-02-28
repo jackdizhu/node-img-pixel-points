@@ -7,14 +7,16 @@
 </head>
 
 <body>
-  <H2>canvas 测试</H2>
-  <canvas id="canvas" width="300" height="400" style="border:1px solid #d3d3d3;position: relative;">
-    您的浏览器不支持 HTML5 canvas 标签。
-  </canvas>
+  <!-- style="width: 1500px;height: 2000px;padding: 300px;" -->
+  <div >
+      <H2>canvas 测试</H2>
+      <canvas id="canvas" width="300" height="400" style="border:1px solid #d3d3d3;position: relative;">
+        您的浏览器不支持 HTML5 canvas 标签。
+      </canvas>
+  </div>
   <script>
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
-
     function get_offsetLeft(obj) {
       var parObj = obj;
       var left = obj.offsetLeft;
@@ -23,7 +25,6 @@
       }
       return left;
     }
-
     function get_offsetTop(obj) {
       var parObj = obj;
       var top = obj.offsetTop;
@@ -33,11 +34,15 @@
       return top;
     }
     // let { offsetLeft, offsetTop } = canvas;
-    let offsetLeft = get_offsetLeft(canvas);
-    let offsetTop = get_offsetTop(canvas);
-
     let [oX, oY] = [0, 0];
+    let arr = [];
+
     canvas.addEventListener('mousemove', function (MouseEvent) {
+      // 处理有滚动条情况
+      let {scrollX, scrollY} = window;
+      let offsetLeft = get_offsetLeft(canvas) - scrollX;
+      let offsetTop = get_offsetTop(canvas) - scrollY;
+
       let { clientX, clientY } = MouseEvent;
       let X = clientX - offsetLeft;
       let Y = clientY - offsetTop;
@@ -54,6 +59,8 @@
       ctx.lineTo(X + 1, Y + 1);
       ctx.stroke();
       [oX, oY] = [X, Y];
+      arr.push({x: X, y: Y});
+      // console.log(JSON.stringify(arr));
     });
     canvas.addEventListener('mouseout', function (MouseEvent) {
       [oX, oY] = [0, 0];
