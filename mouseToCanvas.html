@@ -5,47 +5,94 @@
   <meta charset="utf-8">
   <title>canvas 跟随鼠标画线</title>
 </head>
+<style>
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+#scrollBox {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+}
+</style>
 
 <body>
-  <!-- style="width: 1500px;height: 2000px;padding: 300px;" -->
-  <div >
+  <div id="scrollBox">
+    <!-- style="width: 1500px;height: 2000px;padding: 300px;" -->
+    <div style="padding: 30px;">
       <H2>canvas 测试</H2>
       <canvas id="canvas" width="300" height="400" style="border:1px solid #d3d3d3;position: relative;">
         您的浏览器不支持 HTML5 canvas 标签。
       </canvas>
+    </div>
   </div>
   <script>
     var canvas = document.getElementById("canvas");
+
+    function offset(elem) {
+      var rect, win;
+      if (!elem) {
+        return {};
+      }
+      // Return zeros for disconnected and hidden (display: none) elements (gh-2310)
+      // Support: IE <=11 only
+      // Running getBoundingClientRect on a
+      // disconnected node in IE throws an error
+      if (!elem.getClientRects().length) {
+        return { top: 0, left: 0 };
+      }
+      // Get document-relative position by adding viewport scroll to viewport-relative gBCR
+      rect = elem.getBoundingClientRect();
+      win = elem.ownerDocument.defaultView;
+      return {
+        top: rect.top + win.pageYOffset,
+        left: rect.left + win.pageXOffset
+      };
+    }
+
     var ctx = canvas.getContext("2d");
-    function get_offsetLeft(obj) {
-      var parObj = obj;
-      var left = obj.offsetLeft;
-      while (parObj = parObj.offsetParent) {
-        left += parObj.offsetLeft;
-      }
-      return left;
-    }
-    function get_offsetTop(obj) {
-      var parObj = obj;
-      var top = obj.offsetTop;
-      while (parObj = parObj.offsetParent) {
-        top += parObj.offsetTop;
-      }
-      return top;
-    }
+    // function get_offsetLeft(obj) {
+    //   var parObj = obj;
+    //   var left = obj.offsetLeft;
+    //   while (parObj = parObj.offsetParent) {
+    //     left += parObj.offsetLeft;
+    //   }
+    //   return left;
+    // }
+    // function get_offsetTop(obj) {
+    //   var parObj = obj;
+    //   var top = obj.offsetTop;
+    //   while (parObj = parObj.offsetParent) {
+    //     top += parObj.offsetTop;
+    //   }
+    //   return top;
+    // }
     // let { offsetLeft, offsetTop } = canvas;
     let [oX, oY] = [0, 0];
     let arr = [];
 
+    canvas.addEventListener('mousedown', function (MouseEvent) {
+      console.log(offset(document.getElementById("canvas")));
+    });
+
     canvas.addEventListener('mousemove', function (MouseEvent) {
       // 处理有滚动条情况
-      let {scrollX, scrollY} = window;
-      let offsetLeft = get_offsetLeft(canvas) - scrollX;
-      let offsetTop = get_offsetTop(canvas) - scrollY;
+      let { scrollX, scrollY } = window;
+      // let offsetLeft = get_offsetLeft(canvas) - scrollX;
+      // let offsetTop = get_offsetTop(canvas) - scrollY;
+
+      let offsetLeft = offset(canvas).left - scrollX;
+      let offsetTop = offset(canvas).top - scrollY;
 
       let { clientX, clientY } = MouseEvent;
       let X = clientX - offsetLeft;
       let Y = clientY - offsetTop;
+      console.log({ scrollX, scrollY }); // 鼠标在 canvas 种坐标
       console.log({ X, Y }); // 鼠标在 canvas 种坐标
       ctx.beginPath();
       ctx.lineWidth = "1";
@@ -59,7 +106,7 @@
       ctx.lineTo(X + 1, Y + 1);
       ctx.stroke();
       [oX, oY] = [X, Y];
-      arr.push({x: X, y: Y});
+      arr.push({ x: X, y: Y });
       // console.log(JSON.stringify(arr));
     });
     canvas.addEventListener('mouseout', function (MouseEvent) {
