@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>canvas 简单画板 取点画圆填充</title>
+</head>
+<style>
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+#scrollBox {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: auto;
+}
+  /* .colorSize {
+  } */
+  .size {
+    height: 30px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .color {
+    height: 30px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .size_box {
+    background-color: #ccc;
+  }
+  .color_box {
+    width: 20px;
+    height: 20px;
+  }
+  .size_box,
+  .color_box {
+    border-radius: 50%;
+    margin: 0 4px;
+  }
+  .size_box.on,
+  .color_box.on {
+    /* border: 1px solid #000; */
+    box-shadow:2px 2px 4px #000;
+  }
+  .size_box[data-id='1'] {   width: 3px;height: 3px; }
+  .size_box[data-id='2'] {   width: 6px;height: 6px; }
+  .size_box[data-id='3'] {   width: 9px;height: 9px; }
+  .size_box[data-id='4'] {   width: 12px;height: 12px; }
+  .size_box[data-id='5'] {   width: 15px;height: 15x; }
+  .color_box[data-id='#FFFFFF'] {
+    border: 1px solid #eee;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .color_box[data-id='#FFFFFF'] span {
+    white-space: nowrap;
+    -webkit-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+  .color_box[data-id='#FFFFFF'] {   background: #FFFFFF; }
+  .color_box[data-id='#CCCCCC'] {   background: #CCCCCC; }
+  .color_box[data-id='#CC0033'] {   background: #CC0033; }
+  .color_box[data-id='#FF6666'] {   background: #FF6666; }
+  .color_box[data-id='#FFCCCC'] {   background: #FFCCCC; }
+  .color_box[data-id='#999933'] {   background: #999933; }
+  .color_box[data-id='#CCCC00'] {   background: #CCCC00; }
+  .color_box[data-id='#FFFF99'] {   background: #FFFF99; }
+  .color_box[data-id='#003399'] {   background: #003399; }
+  .color_box[data-id='#0099CC'] {   background: #0099CC; }
+  .color_box[data-id='#CCFFFF'] {   background: #CCFFFF; }
+</style>
+<body>
+  <div id="scrollBox">
+    <!-- style="width: 1500px;height: 2000px;padding: 300px;" -->
+    <div style="padding: 30px;">
+        <H2>canvas 测试</H2>
+        <div class="colorSize">
+          <div id="size" class="size">
+            <div class="size_box size_1 on" data-id="1"></div>
+            <div class="size_box size_2" data-id="2"></div>
+            <div class="size_box size_3" data-id="3"></div>
+            <div class="size_box size_4" data-id="4"></div>
+            <div class="size_box size_5" data-id="5"></div>
+          </div>
+          <div id="color" class="color">
+            <div class="color_box color_#FFFFFF" data-id="#FFFFFF">
+              <span>擦除</span>
+            </div>
+            <div class="color_box color_#CCCCCC on" data-id="#CCCCCC"></div>
+            <div class="color_box color_#CC0033" data-id="#CC0033"></div>
+            <div class="color_box color_#FF6666" data-id="#FF6666"></div>
+            <div class="color_box color_#FFCCCC" data-id="#FFCCCC"></div>
+            <div class="color_box color_#999933" data-id="#999933"></div>
+            <div class="color_box color_#CCCC00" data-id="#CCCC00"></div>
+            <div class="color_box color_#FFFF99" data-id="#FFFF99"></div>
+            <div class="color_box color_#003399" data-id="#003399"></div>
+            <div class="color_box color_#0099CC" data-id="#0099CC"></div>
+            <div class="color_box color_#CCFFFF" data-id="#CCFFFF"></div>
+          </div>
+        </div>
+        <canvas id="canvas" width="300" height="400" style="border:1px solid #d3d3d3;position: relative;">
+          您的浏览器不支持 HTML5 canvas 标签。
+        </canvas>
+    </div>
+  </div>
+  <script>
+    let lineWidth = '1';
+    let strokeStyle = '#000000';
+    let isStart = false;
+    function offset(elem) {
+      var rect, win;
+      if (!elem) {
+        return {};
+      }
+      // Return zeros for disconnected and hidden (display: none) elements (gh-2310)
+      // Support: IE <=11 only
+      // Running getBoundingClientRect on a
+      // disconnected node in IE throws an error
+      if (!elem.getClientRects().length) {
+        return { top: 0, left: 0 };
+      }
+      // Get document-relative position by adding viewport scroll to viewport-relative gBCR
+      rect = elem.getBoundingClientRect();
+      win = elem.ownerDocument.defaultView;
+      return {
+        top: rect.top + win.pageYOffset,
+        left: rect.left + win.pageXOffset
+      };
+    }
+    // 事件监听
+    let size = document.getElementById('size');
+    let color = document.getElementById('color');
+    size.addEventListener('click', function (event) {
+      let el = null;
+      if (event.target.parentNode === size) {
+        el = event.target;
+      } else if (event.target.parentNode.parentNode === size) {
+        el = event.target.parentNode;
+      } else {
+        return false;
+      }
+      let list = size.childNodes;
+      
+      let dataId = el.getAttribute('data-id');
+      if (dataId) {
+        for (let i = 0; i < list.length; i++) {
+          if (list[i].nodeType === 1) {
+            if (list[i] === el) {
+              list[i].className += ' on';
+            } else {
+              list[i].className = list[i].className.replace('on', '');
+            }
+          }
+        }
+        lineWidth = dataId * 2;
+      }
+      // console.log(el);
+    });
+    color.addEventListener('click', function (event) {
+      let el = null;
+      if (event.target.parentNode === color) {
+        el = event.target;
+      } else if (event.target.parentNode.parentNode === color) {
+        el = event.target.parentNode;
+      } else {
+        return false;
+      }
+      let list = color.childNodes;
+      let dataId = el.getAttribute('data-id');
+      if (dataId) {
+        for (let i = 0; i < list.length; i++) {
+          if (list[i].nodeType === 1) {
+            if (list[i] === el) {
+              list[i].className += ' on';
+            } else {
+              list[i].className = list[i].className.replace('on', '');
+            }
+          }
+        }
+        strokeStyle = dataId;
+      }
+      // console.log(el);
+    });
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+    // function get_offsetLeft(obj) {
+    //   var parObj = obj;
+    //   var left = obj.offsetLeft;
+    //   while (parObj = parObj.offsetParent) {
+    //     left += parObj.offsetLeft;
+    //   }
+    //   return left;
+    // }
+    // function get_offsetTop(obj) {
+    //   var parObj = obj;
+    //   var top = obj.offsetTop;
+    //   while (parObj = parObj.offsetParent) {
+    //     top += parObj.offsetTop;
+    //   }
+    //   return top;
+    // }
+    // let { offsetLeft, offsetTop } = canvas;
+    let [oX, oY] = [0, 0];
+    let arr = [];
+
+    // 生成 A -> B 中间点画圆
+    function lintATOB (ctx, A, B, Obj) {
+      let numX = B.X - A.X;
+      let numY = B.Y - A.Y;
+      let len = Math.abs(numX) > Math.abs(numY) ? Math.abs(numX) : Math.abs(numY);
+
+      let jX = 0;
+      if (numX === 0) {
+        jX = 0;
+      } else {
+        jX = numX/len;
+      }
+
+      let jY = 0;
+      if (numY === 0) {
+        jY = 0;
+      } else {
+        jY = numY/len;
+      }
+
+      for (let i = 0; i < len; i++) {
+        let position = {X: A.X + jX * (i + 1), Y: A.Y + jY * (i + 1)};
+
+        ctx.beginPath();
+        ctx.fillStyle = Obj.strokeStyle;
+        ctx.arc(position.X, position.Y, Obj.lineWidth, 0, 2 * Math.PI);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+    canvas.addEventListener('mousedown', function (MouseEvent) {
+      isStart = true;
+    });
+    canvas.addEventListener('mouseup', function (MouseEvent) {
+      isStart = false;
+      [oX, oY] = [0, 0];
+    });
+    canvas.addEventListener('mousemove', function (MouseEvent) {
+      if (!isStart) {
+        return false;
+      }
+      // 处理有滚动条情况
+      let {scrollX, scrollY} = window;
+      // let offsetLeft = get_offsetLeft(canvas) - scrollX;
+      // let offsetTop = get_offsetTop(canvas) - scrollY;
+      let offsetLeft = offset(canvas).left - scrollX;
+      let offsetTop = offset(canvas).top - scrollY;
+      let { clientX, clientY } = MouseEvent;
+      let X = clientX - offsetLeft;
+      let Y = clientY - offsetTop;
+      console.log({ X, Y }); // 鼠标在 canvas 种坐标
+      let R = 1;
+      if (Number(lineWidth) > 2) {
+        R = (Number(lineWidth) - 1) / 2;
+      }
+      // ctx.beginPath();
+      // ctx.arc(X, Y, R, 0, 2*Math.PI);
+      // ctx.stroke();
+
+      // ctx.beginPath();
+      // ctx.lineWidth = lineWidth;
+      // ctx.strokeStyle = strokeStyle;
+      // // 起始点不包含
+
+      let posA = null;
+      let posB = {X: X + 1, Y: Y + 1};
+      if (oX && oY) {
+        posA = {X: oX + 1, Y: oY + 1};
+        // ctx.moveTo(oX + 1, oY + 1);
+      } else {
+        posA = {X: X, Y: Y};
+        // ctx.moveTo(X, Y);
+      }
+      lintATOB (ctx, posA, posB, {lineWidth, strokeStyle});
+      // ctx.lineTo(X + 1, Y + 1);
+      // ctx.stroke();
+
+      [oX, oY] = [X, Y];
+      arr.push({x: X, y: Y});
+      // console.log(JSON.stringify(arr));
+    });
+    canvas.addEventListener('mouseout', function (MouseEvent) {
+      [oX, oY] = [0, 0];
+      isStart = false;
+    });
+  </script>
+</body>
+
+</html>
