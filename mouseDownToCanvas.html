@@ -55,6 +55,20 @@ body {
   .size_box[data-id='3'] {   width: 9px;height: 9px; }
   .size_box[data-id='4'] {   width: 12px;height: 12px; }
   .size_box[data-id='5'] {   width: 15px;height: 15x; }
+  .color_box[data-id='#FFFFFF'] {
+    border: 1px solid #eee;
+    font-size: 12px;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .color_box[data-id='#FFFFFF'] span {
+    white-space: nowrap;
+    -webkit-transform: scale(0.8);
+    transform: scale(0.8);
+  }
+  .color_box[data-id='#FFFFFF'] {   background: #FFFFFF; }
   .color_box[data-id='#CCCCCC'] {   background: #CCCCCC; }
   .color_box[data-id='#CC0033'] {   background: #CC0033; }
   .color_box[data-id='#FF6666'] {   background: #FF6666; }
@@ -80,6 +94,9 @@ body {
             <div class="size_box size_5" data-id="5"></div>
           </div>
           <div id="color" class="color">
+            <div class="color_box color_#FFFFFF" data-id="#FFFFFF">
+              <span>擦除</span>
+            </div>
             <div class="color_box color_#CCCCCC on" data-id="#CCCCCC"></div>
             <div class="color_box color_#CC0033" data-id="#CC0033"></div>
             <div class="color_box color_#FF6666" data-id="#FF6666"></div>
@@ -101,7 +118,6 @@ body {
     let lineWidth = '1';
     let strokeStyle = '#000000';
     let isStart = false;
-
     function offset(elem) {
       var rect, win;
       if (!elem) {
@@ -122,36 +138,50 @@ body {
         left: rect.left + win.pageXOffset
       };
     }
-
     // 事件监听
     let size = document.getElementById('size');
     let color = document.getElementById('color');
     size.addEventListener('click', function (event) {
+      let el = null;
+      if (event.target.parentNode === size) {
+        el = event.target;
+      } else if (event.target.parentNode.parentNode === size) {
+        el = event.target.parentNode;
+      } else {
+        return false;
+      }
       let list = size.childNodes;
       
-      let dataId = event.target.getAttribute('data-id');
+      let dataId = el.getAttribute('data-id');
       if (dataId) {
         for (let i = 0; i < list.length; i++) {
           if (list[i].nodeType === 1) {
-            if (list[i] === event.target) {
+            if (list[i] === el) {
               list[i].className += ' on';
             } else {
               list[i].className = list[i].className.replace('on', '');
             }
           }
         }
-        lineWidth = dataId;
+        lineWidth = dataId * 3;
       }
-      // console.log(event.target);
+      // console.log(el);
     });
     color.addEventListener('click', function (event) {
+      let el = null;
+      if (event.target.parentNode === color) {
+        el = event.target;
+      } else if (event.target.parentNode.parentNode === color) {
+        el = event.target.parentNode;
+      } else {
+        return false;
+      }
       let list = color.childNodes;
-
-      let dataId = event.target.getAttribute('data-id');
+      let dataId = el.getAttribute('data-id');
       if (dataId) {
         for (let i = 0; i < list.length; i++) {
           if (list[i].nodeType === 1) {
-            if (list[i] === event.target) {
+            if (list[i] === el) {
               list[i].className += ' on';
             } else {
               list[i].className = list[i].className.replace('on', '');
@@ -160,9 +190,8 @@ body {
         }
         strokeStyle = dataId;
       }
-      // console.log(event.target);
+      // console.log(el);
     });
-
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
     // function get_offsetLeft(obj) {
@@ -184,7 +213,6 @@ body {
     // let { offsetLeft, offsetTop } = canvas;
     let [oX, oY] = [0, 0];
     let arr = [];
-
     canvas.addEventListener('mousedown', function (MouseEvent) {
       isStart = true;
     });
@@ -202,12 +230,10 @@ body {
       // let offsetTop = get_offsetTop(canvas) - scrollY;
       let offsetLeft = offset(canvas).left - scrollX;
       let offsetTop = offset(canvas).top - scrollY;
-
       let { clientX, clientY } = MouseEvent;
       let X = clientX - offsetLeft;
       let Y = clientY - offsetTop;
       console.log({ X, Y }); // 鼠标在 canvas 种坐标
-
       let R = 1;
       if (Number(lineWidth) > 2) {
         R = (Number(lineWidth) - 1) / 2;
@@ -215,7 +241,6 @@ body {
       // ctx.beginPath();
       // ctx.arc(X, Y, R, 0, 2*Math.PI);
       // ctx.stroke();
-
       ctx.beginPath();
       ctx.lineWidth = lineWidth;
       ctx.strokeStyle = strokeStyle;
