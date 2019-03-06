@@ -80,7 +80,7 @@ body {
   .color_box[data-id='#0099CC'] {   background: #0099CC; }
   .color_box[data-id='#CCFFFF'] {   background: #CCFFFF; }
 </style>
-<body>
+<body style="background: url(https://www.baidu.com/img/bd_logo1.png);">
   <div id="scrollBox">
     <!-- style="width: 1500px;height: 2000px;padding: 300px;" -->
     <div style="padding: 30px;">
@@ -239,9 +239,23 @@ body {
 
         ctx.beginPath();
         ctx.fillStyle = Obj.strokeStyle;
-        ctx.arc(position.X, position.Y, Obj.lineWidth, 0, 2 * Math.PI);
-        ctx.closePath();
-        ctx.fill();
+        if (Obj.strokeStyle === '#FFFFFF') {
+          ctx.globalCompositeOperation = 'destination-out';
+          let rgba = ctx.createRadialGradient(position.X, position.Y, 0, position.X, position.Y, Obj.lineWidth);
+          rgba.addColorStop(0,"rgba(0,0,0,1)");
+          rgba.addColorStop(1,"rgba(255, 255, 255, 0)");
+          // ctx.fillStyle = 'rgba(225,225,225,0.1)'
+          ctx.fillStyle = rgba;
+
+          ctx.arc(position.X, position.Y, Obj.lineWidth * 30, 0, 2 * Math.PI);
+          ctx.closePath();
+          ctx.fill();
+        } else {
+          ctx.globalCompositeOperation = 'source-over';
+          ctx.arc(position.X, position.Y, Obj.lineWidth, 0, 2 * Math.PI);
+          ctx.closePath();
+          ctx.fill();
+        }
       }
     }
     canvas.addEventListener('mousedown', function (MouseEvent) {
