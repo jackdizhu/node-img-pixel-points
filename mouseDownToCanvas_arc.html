@@ -241,13 +241,13 @@ body {
         ctx.fillStyle = Obj.strokeStyle;
         if (Obj.strokeStyle === '#FFFFFF') {
           ctx.globalCompositeOperation = 'destination-out';
-          let rgba = ctx.createRadialGradient(position.X, position.Y, 0, position.X, position.Y, Obj.lineWidth);
+          let rgba = ctx.createRadialGradient(position.X, position.Y, 0, position.X, position.Y, Obj.lineWidth * 3);
           rgba.addColorStop(0,"rgba(0,0,0,1)");
           rgba.addColorStop(1,"rgba(255, 255, 255, 0)");
           // ctx.fillStyle = 'rgba(225,225,225,0.1)'
           ctx.fillStyle = rgba;
 
-          ctx.arc(position.X, position.Y, Obj.lineWidth * 30, 0, 2 * Math.PI);
+          ctx.arc(position.X, position.Y, Obj.lineWidth * 3, 0, 2 * Math.PI);
           ctx.closePath();
           ctx.fill();
         } else {
