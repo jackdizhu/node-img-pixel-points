@@ -21,13 +21,9 @@ body {
 }
   /* .colorSize {
   } */
-  .size {
-    height: 30px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-  .color {
+  .size ,
+  .color ,
+  .btnBox {
     height: 30px;
     display: flex;
     justify-content: flex-start;
@@ -36,12 +32,17 @@ body {
   .size_box {
     background-color: #000;
   }
-  .color_box {
+  .color_box ,
+  .btnBox_box {
     width: 20px;
     height: 20px;
   }
+  .btnBox_box {
+    background-color: #fff;
+  }
   .size_box,
-  .color_box {
+  .color_box ,
+  .btnBox_box {
     border-radius: 50%;
     margin: 0 4px;
   }
@@ -55,7 +56,8 @@ body {
   .size_box[data-id='3'] {   width: 9px;height: 9px; }
   .size_box[data-id='4'] {   width: 12px;height: 12px; }
   .size_box[data-id='5'] {   width: 15px;height: 15x; }
-  .color_box[data-id='#FFFFFF'] {
+  .color_box[data-id='#FFFFFF'] ,
+  .btnBox_box {
     border: 1px solid #eee;
     font-size: 12px;
     color: #666;
@@ -63,7 +65,8 @@ body {
     justify-content: center;
     align-items: center;
   }
-  .color_box[data-id='#FFFFFF'] span {
+  .color_box[data-id='#FFFFFF'] span ,
+  .btnBox_box span {
     white-space: nowrap;
     -webkit-transform: scale(0.8);
     transform: scale(0.8);
@@ -110,6 +113,14 @@ body {
             <div class="color_box color_#0099CC" data-id="#0099CC"></div>
             <div class="color_box color_#CCFFFF" data-id="#CCFFFF"></div>
           </div>
+          <div id="btnBox" class="btnBox">
+            <div class="btnBox_box btnBox_prev" data-id="prev">
+              <span>撤销</span>
+            </div>
+            <div class="btnBox_box btnBox_next" data-id="next">
+              <span>恢复</span>
+            </div>
+          </div>
         </div>
         <canvas id="canvas" width="300" height="400" style="border:1px solid #d3d3d3;position: relative;">
           您的浏览器不支持 HTML5 canvas 标签。
@@ -117,6 +128,47 @@ body {
     </div>
   </div>
   <script>
+    // 保存快照
+    let imgDataArr = [];
+    // 已经撤销的快照
+    let delImgDataArr = [];
+
+    var canvas = document.getElementById("canvas");
+    var ctx = canvas.getContext("2d");
+
+    // 上一步
+    function canvasPrev () {
+      const thisImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      // 撤销
+      // ctx.restore(); // 当前路径和当前位置 不会保存
+      const imgData = imgDataArr.pop();
+      if (imgData) {
+        // 已经撤销的快照
+        delImgDataArr.push(imgData);
+        ctx.putImageData(imgData, 0, 0);
+      }
+      // if (thisImgData === imgData) {
+      //   canvasPrev();
+      // }
+    }
+    // 下一步
+    function canvasNext () {
+      const thisImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      // 恢复
+      const imgData = delImgDataArr.pop();
+      if (imgData) {
+        imgDataArr.push(imgData);
+        ctx.putImageData(imgData, 0, 0);
+      }
+      // if (thisImgData === imgData) {
+      //   canvasPrev();
+      // }
+    }
+
+    // 保存快照
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    imgDataArr.push(imgData);
+
     let lineWidth = 1;
     let strokeStyle = '#000000';
     let isStart = false;
@@ -141,8 +193,30 @@ body {
       };
     }
     // 事件监听
+    let btnBox = document.getElementById('btnBox');
     let size = document.getElementById('size');
     let color = document.getElementById('color');
+    btnBox.addEventListener('click', function (event) {
+      let el = null;
+      if (event.target.parentNode === btnBox) {
+        el = event.target;
+      } else if (event.target.parentNode.parentNode === btnBox) {
+        el = event.target.parentNode;
+      } else {
+        return false;
+      }
+      let list = btnBox.childNodes;
+
+      let dataId = el.getAttribute('data-id');
+      if (dataId === 'prev') {
+        // 上一步
+        canvasPrev();
+      }
+      // 下一步
+      if (dataId === 'next') {
+        canvasNext();
+      }
+    });
     size.addEventListener('click', function (event) {
       let el = null;
       if (event.target.parentNode === size) {
@@ -194,8 +268,7 @@ body {
       }
       // console.log(el);
     });
-    var canvas = document.getElementById("canvas");
-    var ctx = canvas.getContext("2d");
+    
     // function get_offsetLeft(obj) {
     //   var parObj = obj;
     //   var left = obj.offsetLeft;
@@ -238,9 +311,10 @@ body {
 
       for (let i = 0; i < len; i++) {
         let position = {X: A.X + jX * (i + 1), Y: A.Y + jY * (i + 1)};
-
+        
         ctx.beginPath();
         ctx.fillStyle = Obj.strokeStyle;
+
         if (Obj.strokeStyle === '#FFFFFF') {
           ctx.globalCompositeOperation = 'destination-out';
           let rgba = ctx.createRadialGradient(position.X, position.Y, 0, position.X, position.Y, Obj.lineWidth + 3);
@@ -258,12 +332,28 @@ body {
           ctx.closePath();
           ctx.fill();
         }
+        // 保存上下文 实现撤销 恢复
+        // ctx.save(); // 当前路径和当前位置 不会保存
+        // 保存快照
+        // const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        // imgDataArr.push(imgData);
+        // console.log(imgDataArr, 'imgDataArr');
+        
       }
     }
     canvas.addEventListener('mousedown', function (MouseEvent) {
+      // 保存快照
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      imgDataArr.push(imgData);
+
       isStart = true;
     });
     canvas.addEventListener('mouseup', function (MouseEvent) {
+      delImgDataArr = [];
+      // 保存快照
+      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      delImgDataArr.push(imgData);
+
       isStart = false;
       [oX, oY] = [0, 0];
     });
@@ -303,6 +393,7 @@ body {
         posA = {X: X, Y: Y};
         // ctx.moveTo(X, Y);
       }
+
       lintATOB (ctx, posA, posB, {lineWidth, strokeStyle});
       // ctx.lineTo(X + 1, Y + 1);
       // ctx.stroke();
