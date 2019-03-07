@@ -132,41 +132,46 @@ body {
     let imgDataArr = [];
     // 已经撤销的快照
     let delImgDataArr = [];
+    // 临时数据保存 一般保存 canvas 最新快照
+    let __delImgDataArr = null;
 
     var canvas = document.getElementById("canvas");
     var ctx = canvas.getContext("2d");
 
     // 上一步
     function canvasPrev () {
-      const thisImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       // 撤销
       // ctx.restore(); // 当前路径和当前位置 不会保存
-      const imgData = imgDataArr.pop();
+      let imgData = imgDataArr.pop();
+      if (__delImgDataArr === imgData) {
+        delImgDataArr.push(imgData);
+        imgData = imgDataArr.pop();
+      }
       if (imgData) {
         // 已经撤销的快照
         delImgDataArr.push(imgData);
+        __delImgDataArr = imgData;
         ctx.putImageData(imgData, 0, 0);
       }
-      // if (thisImgData === imgData) {
-      //   canvasPrev();
-      // }
     }
     // 下一步
     function canvasNext () {
-      const thisImgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       // 恢复
-      const imgData = delImgDataArr.pop();
+      let imgData = delImgDataArr.pop();
+      if (__delImgDataArr === imgData) {
+        imgDataArr.push(imgData);
+        imgData = delImgDataArr.pop();
+      }
       if (imgData) {
         imgDataArr.push(imgData);
+        __delImgDataArr = imgData;
         ctx.putImageData(imgData, 0, 0);
       }
-      // if (thisImgData === imgData) {
-      //   canvasPrev();
-      // }
     }
 
     // 保存快照
     const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    __delImgDataArr = imgData;
     imgDataArr.push(imgData);
 
     let lineWidth = 1;
@@ -352,6 +357,7 @@ body {
       delImgDataArr = [];
       // 保存快照
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      __delImgDataArr = imgData;
       delImgDataArr.push(imgData);
 
       isStart = false;
