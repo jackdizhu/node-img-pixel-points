@@ -34,7 +34,7 @@ body {
     align-items: center;
   }
   .size_box {
-    background-color: #ccc;
+    background-color: #000;
   }
   .color_box {
     width: 20px;
@@ -69,6 +69,7 @@ body {
     transform: scale(0.8);
   }
   .color_box[data-id='#FFFFFF'] {   background: #FFFFFF; }
+  .color_box[data-id='#000000'] {   background: #000000; }
   .color_box[data-id='#CCCCCC'] {   background: #CCCCCC; }
   .color_box[data-id='#CC0033'] {   background: #CC0033; }
   .color_box[data-id='#FF6666'] {   background: #FF6666; }
@@ -80,7 +81,7 @@ body {
   .color_box[data-id='#0099CC'] {   background: #0099CC; }
   .color_box[data-id='#CCFFFF'] {   background: #CCFFFF; }
 </style>
-<body style="background: #eee;">
+<body style="background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAACC2lUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iWE1QIENvcmUgNS40LjAiPgogICA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPgogICAgICA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIgogICAgICAgICAgICB4bWxuczp0aWZmPSJodHRwOi8vbnMuYWRvYmUuY29tL3RpZmYvMS4wLyI+CiAgICAgICAgIDx0aWZmOlJlc29sdXRpb25Vbml0PjI8L3RpZmY6UmVzb2x1dGlvblVuaXQ+CiAgICAgICAgIDx0aWZmOkNvbXByZXNzaW9uPjE8L3RpZmY6Q29tcHJlc3Npb24+CiAgICAgICAgIDx0aWZmOk9yaWVudGF0aW9uPjE8L3RpZmY6T3JpZW50YXRpb24+CiAgICAgICAgIDx0aWZmOlBob3RvbWV0cmljSW50ZXJwcmV0YXRpb24+MjwvdGlmZjpQaG90b21ldHJpY0ludGVycHJldGF0aW9uPgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KD0UqkwAAANNJREFUOBGFkdENxCAMQwHdRuy/QWdqr4/WkbFOunyUxLETQ/t1R3uDtPeucp3HcRRG7zzPqiEMZ6c4eywY45HAXbWTMncBOYEDQr3NwerYR5YFSbTVKji1xTFZBcO+HIizOXCyCJzgRDoAqwHaLjJND+Hi0QOrASK4yHMXCuc6n3//ec4p/rpCLtoc+B0h5tYUM/l+2GeGyHplH1YWIlkcCeilSENDVyWOhlv99Z+L/S7wmnz5193SQZJ9mXrbIwK6bQ123DHwGuBCGoS/TwofRmtfBQCBi7qhpKMAAAAASUVORK5CYII=);">
   <div id="scrollBox">
     <!-- style="width: 1500px;height: 2000px;padding: 300px;" -->
     <div style="padding: 30px;">
@@ -97,7 +98,8 @@ body {
             <div class="color_box color_#FFFFFF" data-id="#FFFFFF">
               <span>擦除</span>
             </div>
-            <div class="color_box color_#CCCCCC on" data-id="#CCCCCC"></div>
+            <div class="color_box color_#000000 on" data-id="#000000"></div>
+            <div class="color_box color_#CCCCCC" data-id="#CCCCCC"></div>
             <div class="color_box color_#CC0033" data-id="#CC0033"></div>
             <div class="color_box color_#FF6666" data-id="#FF6666"></div>
             <div class="color_box color_#FFCCCC" data-id="#FFCCCC"></div>
@@ -115,7 +117,7 @@ body {
     </div>
   </div>
   <script>
-    let lineWidth = '1';
+    let lineWidth = 1;
     let strokeStyle = '#000000';
     let isStart = false;
     function offset(elem) {
@@ -241,13 +243,13 @@ body {
         ctx.fillStyle = Obj.strokeStyle;
         if (Obj.strokeStyle === '#FFFFFF') {
           ctx.globalCompositeOperation = 'destination-out';
-          let rgba = ctx.createRadialGradient(position.X, position.Y, 0, position.X, position.Y, Obj.lineWidth * 3);
+          let rgba = ctx.createRadialGradient(position.X, position.Y, 0, position.X, position.Y, Obj.lineWidth + 3);
           rgba.addColorStop(0,"rgba(0,0,0,1)");
           rgba.addColorStop(1,"rgba(255, 255, 255, 0)");
           // ctx.fillStyle = 'rgba(225,225,225,0.1)'
           ctx.fillStyle = rgba;
 
-          ctx.arc(position.X, position.Y, Obj.lineWidth * 3, 0, 2 * Math.PI);
+          ctx.arc(position.X, position.Y, Obj.lineWidth + 3, 0, 2 * Math.PI);
           ctx.closePath();
           ctx.fill();
         } else {
